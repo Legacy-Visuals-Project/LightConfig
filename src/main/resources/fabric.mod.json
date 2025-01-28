@@ -1,0 +1,26 @@
+{
+	"schemaVersion": 1,
+	"id": "lightconfig",
+	"version": "${version}",
+	"name": "LightConfig",
+	"description": "A config library.",
+	"authors": [
+		"lowercasebtw",
+		"mixces"
+	],
+	"license": "LGPL-3.0",
+	"icon": "assets/lightconfig/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"btw.mixces.lightconfig.LightConfigClient"
+		]
+	},
+	"mixins": [
+		"lightconfig.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.16.7",
+		"minecraft": ">=1.21.4 <1.21.5"
+	}
+}
