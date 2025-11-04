@@ -1,7 +1,5 @@
 package org.visuals.legacy.lightconfig.lib.v1.field;
 
-import btw.lowercase.lightconfig.lib.ConfigTranslate;
-import btw.lowercase.lightconfig.lib.v1.Config;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
@@ -9,6 +7,8 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
+import org.visuals.legacy.lightconfig.lib.ConfigTranslate;
+import org.visuals.legacy.lightconfig.lib.v1.Config;
 
 import java.util.Arrays;
 import java.util.Optional;

@@ -1,9 +1,9 @@
 package org.visuals.legacy.lightconfig.lib.v1.field;
 
-import btw.lowercase.lightconfig.lib.v1.Config;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import org.visuals.legacy.lightconfig.lib.v1.Config;
 
 public class NumericConfigField<T extends Number> extends GenericConfigField<T> {
     public NumericConfigField(final Config config, final String name, final T defaultValue) {

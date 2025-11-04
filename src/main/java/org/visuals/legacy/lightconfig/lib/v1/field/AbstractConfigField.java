@@ -1,8 +1,8 @@
 package org.visuals.legacy.lightconfig.lib.v1.field;
 
-import btw.lowercase.lightconfig.lib.v1.Config;
 import com.google.gson.JsonObject;
 import net.minecraft.client.gui.components.AbstractWidget;
+import org.visuals.legacy.lightconfig.lib.v1.Config;
 
 public abstract class AbstractConfigField<T> {
     protected final Config config;

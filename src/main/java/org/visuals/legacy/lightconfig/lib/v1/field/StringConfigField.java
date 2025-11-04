@@ -1,9 +1,9 @@
 package org.visuals.legacy.lightconfig.lib.v1.field;
 
-import btw.lowercase.lightconfig.lib.v1.Config;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import org.visuals.legacy.lightconfig.lib.v1.Config;
 
 public class StringConfigField extends GenericConfigField<String> {
     public StringConfigField(final Config config, final String name, final String defaultValue) {

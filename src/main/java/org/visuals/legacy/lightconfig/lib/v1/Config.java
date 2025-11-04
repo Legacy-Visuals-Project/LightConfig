@@ -1,15 +1,12 @@
 package org.visuals.legacy.lightconfig.lib.v1;
 
-import btw.lowercase.lightconfig.lib.v1.field.*;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.visuals.legacy.lightconfig.lib.v1.field.*;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Config {
-    protected static final Gson GSON = new GsonBuilder().setPrettyPrinting().setLenient().create();
+    protected static final Gson GSON = new GsonBuilder().setPrettyPrinting().setStrictness(Strictness.LENIENT).create();
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
     protected final List<AbstractConfigField<?>> configFields = new ArrayList<>();
     protected final ModContainer modContainer;
