@@ -31,8 +31,8 @@ import org.visuals.legacy.lightconfig.lib.v1.Config;
 
 @ApiStatus.Internal
 public class InternalConfigScreen extends Screen {
-    private final Screen parent;
-    private final Config config;
+    protected final Screen parent;
+    protected final Config config;
 
     public InternalConfigScreen(Component title, Config config, Screen parent) {
         super(title);
