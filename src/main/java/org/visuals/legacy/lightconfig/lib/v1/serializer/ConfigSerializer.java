@@ -22,13 +22,12 @@
  * "MINECRAFT" LINKING EXCEPTION TO THE GPL
  */
 
-package org.visuals.legacy.lightconfig.lib.v1;
+package org.visuals.legacy.lightconfig.lib.v1.serializer;
 
-// TODO
-public class ConfigSerializer<T> {
-    public void read(T value) {
-    }
+import org.jetbrains.annotations.Nullable;
 
-    public void write(T value) {
-    }
+public abstract class ConfigSerializer<T> {
+    public abstract @Nullable T deserialize(Object value);
+
+    public abstract byte[] serialize(T value);
 }

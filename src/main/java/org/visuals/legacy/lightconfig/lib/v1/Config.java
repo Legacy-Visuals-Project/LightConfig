@@ -24,13 +24,16 @@
 
 package org.visuals.legacy.lightconfig.lib.v1;
 
-import com.google.gson.*;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.visuals.legacy.lightconfig.lib.v1.field.*;
+import org.visuals.legacy.lightconfig.lib.v1.serializer.ConfigSerializer;
+import org.visuals.legacy.lightconfig.lib.v1.serializer.JsonSerializer;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -38,17 +41,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Config {
-    protected static final Gson GSON = new GsonBuilder().setPrettyPrinting().setStrictness(Strictness.LENIENT).create();
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
     protected final List<AbstractConfigField<?>> configFields = new ArrayList<>();
     protected final ModContainer modContainer;
     protected final Path path;
-    protected final ConfigSerializer<? extends JsonElement> serializer;
+    protected final ConfigSerializer<?> serializer;
 
-    public Config(ModContainer modContainer, Path path) {
+    public Config(ModContainer modContainer, Path path, ConfigSerializer<?> serializer) {
         this.modContainer = modContainer;
         this.path = path;
-        this.serializer = new ConfigSerializer<>();
+        this.serializer = serializer;
+        if (!(this.serializer instanceof JsonSerializer)) {
+            throw new RuntimeException("Only json serialization is currently supported! Please use JsonSerializer!");
+        }
+    }
+
+    public Config(ModContainer modContainer, Path path) {
+        this(modContainer, path, null);
     }
 
     public BooleanConfigField booleanFieldOf(final String name, final boolean defaultValue) {
@@ -84,7 +93,7 @@ public abstract class Config {
 
         try {
             final String json = Files.readString(this.path);
-            final JsonObject object = GSON.fromJson(json, JsonObject.class);
+            final JsonObject object = ((JsonElement) this.serializer.deserialize(json)).getAsJsonObject();
             if (object == null) {
                 this.logger.warn("Failed to load config! Defaulting to original settings.");
             } else {
@@ -115,7 +124,7 @@ public abstract class Config {
         });
 
         try {
-            Files.write(this.path, GSON.toJson(object).getBytes());
+            Files.write(this.path, ((JsonSerializer) this.serializer).serialize(object));
         } catch (Exception ignored) {
             this.logger.warn("Failed to save config!");
             return;
@@ -129,8 +138,6 @@ public abstract class Config {
         this.configFields.forEach(AbstractConfigField::restore);
         this.save();
     }
-
-    public abstract Screen getConfigScreen(@Nullable Screen parent);
 
     public Logger getLogger() {
         return logger;
@@ -147,4 +154,6 @@ public abstract class Config {
     public Path getPath() {
         return path;
     }
+
+    public abstract Screen getConfigScreen(@Nullable Screen parent);
 }

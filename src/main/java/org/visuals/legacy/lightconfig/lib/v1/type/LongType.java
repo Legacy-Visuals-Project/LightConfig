@@ -24,5 +24,5 @@
 
 package org.visuals.legacy.lightconfig.lib.v1.type;
 
-public class LongType {
+public class LongType extends Type {
 }
