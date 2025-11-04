@@ -30,7 +30,7 @@ import com.google.gson.JsonPrimitive;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
-import org.visuals.legacy.lightconfig.lib.ConfigTranslate;
+import org.visuals.legacy.lightconfig.lib.v1.ConfigTranslate;
 import org.visuals.legacy.lightconfig.lib.v1.Config;
 
 public class BooleanConfigField extends GenericConfigField<Boolean> {

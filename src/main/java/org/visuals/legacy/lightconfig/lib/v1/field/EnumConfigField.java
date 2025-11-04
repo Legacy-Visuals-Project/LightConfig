@@ -31,7 +31,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
-import org.visuals.legacy.lightconfig.lib.ConfigTranslate;
+import org.visuals.legacy.lightconfig.lib.v1.ConfigTranslate;
 import org.visuals.legacy.lightconfig.lib.v1.Config;
 
 import java.util.Arrays;

@@ -91,11 +91,13 @@ public abstract class Config {
             return;
         }
 
+        boolean success = true;
         try {
             final String json = Files.readString(this.path);
             final JsonObject object = ((JsonElement) this.serializer.deserialize(json)).getAsJsonObject();
             if (object == null) {
                 this.logger.warn("Failed to load config! Defaulting to original settings.");
+                success = false;
             } else {
                 this.configFields.forEach(field -> {
                     try {
@@ -110,7 +112,9 @@ public abstract class Config {
             return;
         }
 
-        this.logger.info("Config successfully loaded!");
+        if (success) {
+            this.logger.info("Config successfully loaded!");
+        }
     }
 
     public void save() {

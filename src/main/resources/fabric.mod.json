@@ -11,10 +11,6 @@
 	"license": "GPL-3.0-with-linking-exception",
 	"icon": "assets/lightconfig/icon.png",
 	"environment": "client",
-	"entrypoints": {},
-	"mixins": [
-		"lightconfig.mixins.json"
-	],
 	"depends": {
 		"fabricloader": "*",
 		"minecraft": "~1.21.9"

@@ -22,7 +22,7 @@
  * "MINECRAFT" LINKING EXCEPTION TO THE GPL
  */
 
-package org.visuals.legacy.lightconfig.lib;
+package org.visuals.legacy.lightconfig.lib.v1;
 
 import net.minecraft.network.chat.Component;
 
