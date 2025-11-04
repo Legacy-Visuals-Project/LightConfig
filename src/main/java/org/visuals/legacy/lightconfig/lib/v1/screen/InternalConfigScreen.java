@@ -26,8 +26,10 @@ package org.visuals.legacy.lightconfig.lib.v1.screen;
 
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.ApiStatus;
 import org.visuals.legacy.lightconfig.lib.v1.Config;
 
+@ApiStatus.Internal
 public class InternalConfigScreen extends Screen {
     private final Screen parent;
     private final Config config;
