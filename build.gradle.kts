@@ -1,6 +1,7 @@
 plugins {
     id("fabric-loom") version "1.12-SNAPSHOT"
     id("maven-publish")
+    id("com.diffplug.spotless") version "8.0.0"
 }
 
 class Loader {
@@ -71,5 +72,17 @@ publishing {
 
     // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
     repositories {
+    }
+}
+
+spotless {
+    val licenseHeader = rootProject.file("HEADER")
+    lineEndings = com.diffplug.spotless.LineEnding.UNIX
+    java {
+        licenseHeaderFile(licenseHeader)
+    }
+
+    kotlin {
+        licenseHeaderFile(licenseHeader)
     }
 }
