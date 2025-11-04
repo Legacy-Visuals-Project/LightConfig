@@ -5,4 +5,4 @@ Join our discord: https://discord.gg/zqnXSUqedW
 
 ## License
 
-This project is licensed under the LGPL-3 license.
+This project is licensed under the GPL-3.0 license w/ Minecraft Linking Exception.

@@ -1,6 +1,6 @@
 {
 	"required": true,
-	"package": "btw.mixces.lightconfig.mixins",
+	"package": "org.visuals.legacy.lightconfig",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
 	],

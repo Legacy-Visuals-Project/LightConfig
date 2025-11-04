@@ -1,0 +1,6 @@
+{
+	"options.template": "%s: %s",
+	"options.on": "ON",
+	"options.off": "OFF",
+	"options.reset": "Reset"
+}

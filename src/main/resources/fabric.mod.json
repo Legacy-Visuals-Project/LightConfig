@@ -3,24 +3,20 @@
 	"id": "lightconfig",
 	"version": "${version}",
 	"name": "LightConfig",
-	"description": "A config library.",
+	"description": "${mod_description}",
 	"authors": [
 		"lowercasebtw",
 		"mixces"
 	],
-	"license": "LGPL-3.0",
+	"license": "GPL-3.0-with-linking-exception",
 	"icon": "assets/lightconfig/icon.png",
 	"environment": "client",
-	"entrypoints": {
-		"client": [
-			"btw.mixces.lightconfig.LightConfigClient"
-		]
-	},
+	"entrypoints": {},
 	"mixins": [
 		"lightconfig.mixins.json"
 	],
 	"depends": {
-		"fabricloader": ">=0.16.7",
-		"minecraft": ">=1.21.4 <1.21.5"
+		"fabricloader": "*",
+		"minecraft": "~1.21.9"
 	}
 }

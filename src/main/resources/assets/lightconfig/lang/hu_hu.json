@@ -1,0 +1,6 @@
+{
+	"options.template": "%s: %s",
+	"options.on": "BE",
+	"options.off": "KI",
+	"options.reset": "Visszaállít"
+}
