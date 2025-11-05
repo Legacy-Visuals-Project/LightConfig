@@ -32,8 +32,10 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.visuals.legacy.lightconfig.lib.v1.field.*;
-import org.visuals.legacy.lightconfig.lib.v1.serializer.ConfigSerializer;
-import org.visuals.legacy.lightconfig.lib.v1.serializer.JsonSerializer;
+import org.visuals.legacy.lightconfig.lib.v1.serialization.ConfigDeserializer;
+import org.visuals.legacy.lightconfig.lib.v1.serialization.ConfigSerializer;
+import org.visuals.legacy.lightconfig.lib.v1.serialization.Json;
+import org.visuals.legacy.lightconfig.lib.v1.type.Type;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -46,18 +48,20 @@ public abstract class Config {
     protected final ModContainer modContainer;
     protected final Path path;
     protected final ConfigSerializer<?> serializer;
+    protected final ConfigDeserializer<?> deserializer;
 
-    public Config(ModContainer modContainer, Path path, ConfigSerializer<?> serializer) {
+    public Config(ModContainer modContainer, Path path, ConfigSerializer<?> serializer, ConfigDeserializer<?> deserializer) {
         this.modContainer = modContainer;
         this.path = path;
         this.serializer = serializer;
-        if (!(this.serializer instanceof JsonSerializer)) {
-            throw new RuntimeException("Only json serialization is currently supported! Please use JsonSerializer!");
+        this.deserializer = deserializer;
+        if (this.serializer != Json.SERIALIZER || this.deserializer != Json.DESERIALIZER) {
+            throw new RuntimeException("Only json serialization is currently supported! Please use Json.SERIALIZER/Json.DESERIALIZER!");
         }
     }
 
     public Config(ModContainer modContainer, Path path) {
-        this(modContainer, path, null);
+        this(modContainer, path, Json.SERIALIZER, Json.DESERIALIZER);
     }
 
     public BooleanConfigField booleanFieldOf(final String name, final boolean defaultValue) {
@@ -72,8 +76,8 @@ public abstract class Config {
         return field;
     }
 
-    public <T extends Number> NumericConfigField<T> numericFieldOf(final String name, final T defaultValue) {
-        final NumericConfigField<T> field = new NumericConfigField<>(this, name, defaultValue);
+    public <T extends Number> NumericConfigField<T> numericFieldOf(final String name, final Type<T> type, final T defaultValue) {
+        final NumericConfigField<T> field = new NumericConfigField<>(this, type, name, defaultValue);
         this.configFields.add(field);
         return field;
     }
@@ -94,14 +98,18 @@ public abstract class Config {
         boolean success = true;
         try {
             final String json = Files.readString(this.path);
-            final JsonObject object = ((JsonElement) this.serializer.deserialize(json)).getAsJsonObject();
+            final JsonObject object = ((JsonElement) this.deserializer.deserialize(json)).getAsJsonObject();
             if (object == null) {
                 this.logger.warn("Failed to load config! Defaulting to original settings.");
                 success = false;
             } else {
                 this.configFields.forEach(field -> {
                     try {
-                        field.load(object);
+                        if (!object.has(field.getName())) {
+                            throw new Exception("Failed to load value for '" + field.getName() + "', object didn't contain a value for it.");
+                        } else {
+                            field.load(object);
+                        }
                     } catch (Exception exception) {
                         this.logger.warn(exception.getMessage());
                     }
@@ -128,7 +136,7 @@ public abstract class Config {
         });
 
         try {
-            Files.write(this.path, ((JsonSerializer) this.serializer).serialize(object));
+            Files.write(this.path, ((ConfigSerializer<JsonElement>) this.serializer).serialize(object));
         } catch (Exception ignored) {
             this.logger.warn("Failed to save config!");
             return;

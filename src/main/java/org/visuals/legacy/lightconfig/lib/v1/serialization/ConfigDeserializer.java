@@ -22,7 +22,10 @@
  * "MINECRAFT" LINKING EXCEPTION TO THE GPL
  */
 
-package org.visuals.legacy.lightconfig.lib.v1.type;
+package org.visuals.legacy.lightconfig.lib.v1.serialization;
 
-public class FloatType extends Type {
+import org.jetbrains.annotations.Nullable;
+
+public abstract class ConfigDeserializer<T> {
+    public abstract @Nullable T deserialize(Object value);
 }

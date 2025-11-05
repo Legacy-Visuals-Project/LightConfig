@@ -31,10 +31,11 @@ import org.visuals.legacy.lightconfig.lib.v1.Config;
 
 public class ConfigScreenBuilder {
     private final Config config;
-    private Component title = Component.empty();
+    private Component title;
 
     private ConfigScreenBuilder(Config config) {
         this.config = config;
+        this.title = Component.empty();
     }
 
     public static ConfigScreenBuilder builder(Config config) {

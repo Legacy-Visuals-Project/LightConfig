@@ -31,19 +31,20 @@ import org.visuals.legacy.lightconfig.lib.v1.Config;
 public abstract class AbstractConfigField<T> {
     protected final Config config;
     protected final String name;
+    protected T value;
     protected final T defaultValue;
 
     public AbstractConfigField(final Config config, final String name, final T defaultValue) {
         this.config = config;
         this.name = name;
+        this.value = defaultValue;
         this.defaultValue = defaultValue;
     }
 
+    // TODO/Swap w/ serializer/deserializer
     public abstract void load(JsonObject object) throws Exception;
 
     public abstract void save(JsonObject object) throws Exception;
-
-    public abstract void restore();
 
     public abstract AbstractWidget createWidget();
 
@@ -55,7 +56,19 @@ public abstract class AbstractConfigField<T> {
         return name;
     }
 
+    public T getValue() {
+        return value;
+    }
+
     public T getDefaultValue() {
         return this.defaultValue;
+    }
+
+    public void setValue(T value) {
+        this.value = value;
+    }
+
+    public void restore() {
+        this.setValue(this.getDefaultValue());
     }
 }

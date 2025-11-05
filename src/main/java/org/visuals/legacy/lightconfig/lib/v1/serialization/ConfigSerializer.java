@@ -22,7 +22,8 @@
  * "MINECRAFT" LINKING EXCEPTION TO THE GPL
  */
 
-package org.visuals.legacy.lightconfig.lib.v1.type;
+package org.visuals.legacy.lightconfig.lib.v1.serialization;
 
-public class StringType extends Type {
+public abstract class ConfigSerializer<T> {
+    public abstract byte[] serialize(T value);
 }

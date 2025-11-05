@@ -24,32 +24,36 @@
 
 package org.visuals.legacy.lightconfig.lib.v1.field;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import net.minecraft.client.gui.components.AbstractWidget;
 import org.visuals.legacy.lightconfig.lib.v1.Config;
+import org.visuals.legacy.lightconfig.lib.v1.type.Type;
 
-public class NumericConfigField<T extends Number> extends GenericConfigField<T> {
-    public NumericConfigField(final Config config, final String name, final T defaultValue) {
+public class NumericConfigField<T extends Number> extends AbstractConfigField<T> {
+    private final Type<T> type;
+
+    public NumericConfigField(final Config config, final Type<T> type, final String name, final T defaultValue) {
         super(config, name, defaultValue);
+        this.type = type;
     }
 
     @Override
     public void load(JsonObject object) throws Exception {
-        if (!object.has(this.name)) {
-            throw new Exception("Failed to load value for '" + this.name + "', object didn't contain a value for it.");
+        final T value = this.type.read(object, this.name);
+        if (value == null) {
+            throw new Exception("Failed to load value for '" + this.name + "'");
         } else {
-            final JsonElement element = object.get(this.name);
-            if (!element.isJsonPrimitive() || (element instanceof final JsonPrimitive primitive && !primitive.isNumber())) {
-                throw new Exception("Failed to load value for '" + this.name + "', type does not match.");
-            } else {
-                this.setValue((T) element.getAsNumber());
-            }
+            this.setValue(value);
         }
     }
 
     @Override
     public void save(JsonObject object) {
-        object.addProperty(this.name, this.value);
+        this.type.write(object, this.name, this.value);
+    }
+
+    @Override
+    public AbstractWidget createWidget() {
+        return null; // TODO
     }
 }

@@ -31,14 +31,38 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
-import org.visuals.legacy.lightconfig.lib.v1.ConfigTranslate;
+import org.jetbrains.annotations.Nullable;
 import org.visuals.legacy.lightconfig.lib.v1.Config;
+import org.visuals.legacy.lightconfig.lib.v1.Translations;
+import org.visuals.legacy.lightconfig.lib.v1.serialization.ConfigDeserializer;
+import org.visuals.legacy.lightconfig.lib.v1.serialization.ConfigSerializer;
+import org.visuals.legacy.lightconfig.lib.v1.type.Type;
 
 import java.util.Arrays;
 import java.util.Optional;
 
-public class EnumConfigField<T extends Enum<T>> extends GenericConfigField<T> {
+public class EnumConfigField<T extends Enum<T>> extends AbstractConfigField<T> {
     private final Class<T> enumClazz;
+
+    private final Type<T> ENUM_TYPE = new Type<>() {
+        @Override
+        public @Nullable T read(JsonObject object, String name) {
+            final JsonElement element = object.get(name);
+            if (element == null || !element.isJsonPrimitive() || (element instanceof final JsonPrimitive primitive && !primitive.isString())) {
+                return null;
+            } else {
+                return Arrays.stream(EnumConfigField.this.enumClazz.getEnumConstants())
+                        .filter(cons -> cons.name().equals(element.getAsString()))
+                        .findFirst()
+                        .orElse(null);
+            }
+        }
+
+        @Override
+        public void write(JsonObject object, String name, T value) {
+            object.addProperty(name, value.name());
+        }
+    };
 
     public EnumConfigField(Config config, String name, T defaultValue, Class<T> clazz) {
         super(config, name, defaultValue);
@@ -47,24 +71,17 @@ public class EnumConfigField<T extends Enum<T>> extends GenericConfigField<T> {
 
     @Override
     public void load(JsonObject object) throws Exception {
-        if (!object.has(this.name)) {
-            throw new Exception("Failed to load value for '" + this.name + "', object didn't contain a value for it.");
+        final T value = ENUM_TYPE.read(object, this.name);
+        if (value == null) {
+            throw new Exception("Failed to load value for '" + this.name + "'");
         } else {
-            final JsonElement element = object.get(this.name);
-            if (!element.isJsonPrimitive() || (element instanceof final JsonPrimitive primitive && !primitive.isString())) {
-                throw new Exception("Failed to load value for '" + this.name + "', type does not match.");
-            } else {
-                Optional<T> opt = Arrays.stream(this.enumClazz.getEnumConstants())
-                        .filter(cons -> cons.name().equals(element.getAsString()))
-                        .findFirst();
-                this.setValue(opt.orElseThrow(() -> new Exception("Failed to load value for '" + this.name + "', invalid enum value.")));
-            }
+            this.setValue(value);
         }
     }
 
     @Override
     public void save(JsonObject object) {
-        object.addProperty(this.name, this.value.name());
+        ENUM_TYPE.write(object, this.name, this.value);
     }
 
     @Override
@@ -77,11 +94,11 @@ public class EnumConfigField<T extends Enum<T>> extends GenericConfigField<T> {
                     this.setValue(next);
                     button.setMessage(getDisplayText(translate, translationKey));
                 })
-                .tooltip(Tooltip.create(ConfigTranslate.tooltip(translationKey)))
+                .tooltip(Tooltip.create(Translations.tooltip(translationKey)))
                 .build();
     }
 
     private Component getDisplayText(final Component translate, final String translationKey) {
-        return ConfigTranslate.TEMPLATE.apply(translate, Component.translatable(translationKey + '.' + this.getValue().name()));
+        return Translations.TEMPLATE.apply(translate, Component.translatable(translationKey + '.' + this.getValue().name()));
     }
 }

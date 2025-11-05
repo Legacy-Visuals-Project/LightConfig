@@ -24,32 +24,33 @@
 
 package org.visuals.legacy.lightconfig.lib.v1.field;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import net.minecraft.client.gui.components.AbstractWidget;
 import org.visuals.legacy.lightconfig.lib.v1.Config;
+import org.visuals.legacy.lightconfig.lib.v1.type.Types;
 
-public class StringConfigField extends GenericConfigField<String> {
+public class StringConfigField extends AbstractConfigField<String> {
     public StringConfigField(final Config config, final String name, final String defaultValue) {
         super(config, name, defaultValue);
     }
 
     @Override
     public void load(JsonObject object) throws Exception {
-        if (!object.has(this.name)) {
-            throw new Exception("Failed to load value for '" + this.name + "', object didn't contain a value for it.");
+        final String value = Types.STRING_TYPE.read(object, this.name);
+        if (value == null) {
+            throw new Exception("Failed to load value for '" + this.name + "'");
         } else {
-            final JsonElement element = object.get(this.name);
-            if (!element.isJsonPrimitive() || (element instanceof final JsonPrimitive primitive && !primitive.isString())) {
-                throw new Exception("Failed to load value for '" + this.name + "', type does not match.");
-            } else {
-                this.setValue(element.getAsString());
-            }
+            this.setValue(value);
         }
     }
 
     @Override
     public void save(JsonObject object) {
-        object.addProperty(this.name, this.value);
+        Types.STRING_TYPE.write(object, this.name, this.value);
+    }
+
+    @Override
+    public AbstractWidget createWidget() {
+        return null; // TODO
     }
 }
