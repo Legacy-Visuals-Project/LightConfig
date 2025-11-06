@@ -24,16 +24,19 @@
 
 package org.visuals.legacy.lightconfig.lib.v1.serialization;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.Strictness;
+import com.google.gson.*;
 import org.jetbrains.annotations.Nullable;
 
 public class Json {
     protected static final Gson GSON = new GsonBuilder().setPrettyPrinting().setStrictness(Strictness.LENIENT).create();
 
-    public static final ConfigSerializer<JsonElement> SERIALIZER = new ConfigSerializer<>() {
+    public static class Serializer extends ConfigSerializer<JsonElement> {
+        private JsonObject object = new JsonObject();
+
+        public void withObject(JsonObject object) {
+            this.object = object;
+        }
+
         @Override
         public byte[] serialize(JsonElement value) {
             if (value == null) {
@@ -42,9 +45,19 @@ public class Json {
                 return GSON.toJson(value).getBytes();
             }
         }
-    };
 
-    public static final ConfigDeserializer<JsonElement> DESERIALIZER = new ConfigDeserializer<>() {
+        public JsonObject object() {
+            return this.object;
+        }
+    }
+
+    public static class Deserializer extends ConfigDeserializer<JsonElement> {
+        private JsonObject object = new JsonObject();
+
+        public void withObject(JsonObject object) {
+            this.object = object;
+        }
+
         @Override
         public @Nullable JsonElement deserialize(Object value) {
             if (!(value instanceof String string)) {
@@ -53,5 +66,9 @@ public class Json {
                 return GSON.fromJson(string, JsonElement.class);
             }
         }
-    };
+
+        public JsonObject object() {
+            return this.object;
+        }
+    }
 }

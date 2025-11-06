@@ -25,15 +25,17 @@
 package org.visuals.legacy.lightconfig.lib.v1.type;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import org.jetbrains.annotations.Nullable;
+import org.visuals.legacy.lightconfig.lib.v1.serialization.ConfigDeserializer;
+import org.visuals.legacy.lightconfig.lib.v1.serialization.ConfigSerializer;
+import org.visuals.legacy.lightconfig.lib.v1.serialization.Json;
 
 public final class Types {
     public static final Type<Boolean> BOOLEAN_TYPE = new Type<>() {
         @Override
-        public @Nullable Boolean read(JsonObject object, String name) {
-            final JsonElement element = object.get(name);
+        public @Nullable Boolean read(ConfigDeserializer<?> deserializer, String name) {
+            final JsonElement element = ((Json.Deserializer) deserializer).object().get(name);
             if (element == null || !element.isJsonPrimitive() || (element instanceof final JsonPrimitive primitive && !primitive.isBoolean())) {
                 return null;
             } else {
@@ -42,15 +44,15 @@ public final class Types {
         }
 
         @Override
-        public void write(JsonObject object, String name, Boolean value) {
-            object.addProperty(name, value);
+        public void write(ConfigSerializer<?> serializer, String name, Boolean value) {
+            ((Json.Serializer) serializer).object().addProperty(name, value);
         }
     };
 
     public static final Type<Integer> INTEGER_TYPE = new Type<>() {
         @Override
-        public @Nullable Integer read(JsonObject object, String name) {
-            final JsonElement element = object.get(name);
+        public @Nullable Integer read(ConfigDeserializer<?> deserializer, String name) {
+            final JsonElement element = ((Json.Deserializer) deserializer).object().get(name);
             if (element == null || !element.isJsonPrimitive() || (element instanceof final JsonPrimitive primitive && !primitive.isNumber())) {
                 return null;
             } else {
@@ -59,15 +61,32 @@ public final class Types {
         }
 
         @Override
-        public void write(JsonObject object, String name, Integer value) {
-            object.addProperty(name, value);
+        public void write(ConfigSerializer<?> serializer, String name, Integer value) {
+            ((Json.Serializer) serializer).object().addProperty(name, value);
+        }
+    };
+
+    public static final Type<Short> SHORT_TYPE = new Type<>() {
+        @Override
+        public @Nullable Short read(ConfigDeserializer<?> deserializer, String name) {
+            final JsonElement element = ((Json.Deserializer) deserializer).object().get(name);
+            if (element == null || !element.isJsonPrimitive() || (element instanceof final JsonPrimitive primitive && !primitive.isNumber())) {
+                return null;
+            } else {
+                return element.getAsNumber().shortValue();
+            }
+        }
+
+        @Override
+        public void write(ConfigSerializer<?> serializer, String name, Short value) {
+            ((Json.Serializer) serializer).object().addProperty(name, value);
         }
     };
 
     public static final Type<Double> DOUBLE_TYPE = new Type<>() {
         @Override
-        public @Nullable Double read(JsonObject object, String name) {
-            final JsonElement element = object.get(name);
+        public @Nullable Double read(ConfigDeserializer<?> deserializer, String name) {
+            final JsonElement element = ((Json.Deserializer) deserializer).object().get(name);
             if (element == null || !element.isJsonPrimitive() || (element instanceof final JsonPrimitive primitive && !primitive.isNumber())) {
                 return null;
             } else {
@@ -76,15 +95,15 @@ public final class Types {
         }
 
         @Override
-        public void write(JsonObject object, String name, Double value) {
-            object.addProperty(name, value);
+        public void write(ConfigSerializer<?> serializer, String name, Double value) {
+            ((Json.Serializer) serializer).object().addProperty(name, value);
         }
     };
 
     public static final Type<Float> FLOAT_TYPE = new Type<>() {
         @Override
-        public @Nullable Float read(JsonObject object, String name) {
-            final JsonElement element = object.get(name);
+        public @Nullable Float read(ConfigDeserializer<?> deserializer, String name) {
+            final JsonElement element = ((Json.Deserializer) deserializer).object().get(name);
             if (element == null || !element.isJsonPrimitive() || (element instanceof final JsonPrimitive primitive && !primitive.isNumber())) {
                 return null;
             } else {
@@ -93,15 +112,15 @@ public final class Types {
         }
 
         @Override
-        public void write(JsonObject object, String name, Float value) {
-            object.addProperty(name, value);
+        public void write(ConfigSerializer<?> serializer, String name, Float value) {
+            ((Json.Serializer) serializer).object().addProperty(name, value);
         }
     };
 
     public static final Type<Long> LONG_TYPE = new Type<>() {
         @Override
-        public @Nullable Long read(JsonObject object, String name) {
-            final JsonElement element = object.get(name);
+        public @Nullable Long read(ConfigDeserializer<?> deserializer, String name) {
+            final JsonElement element = ((Json.Deserializer) deserializer).object().get(name);
             if (element == null || !element.isJsonPrimitive() || (element instanceof final JsonPrimitive primitive && !primitive.isNumber())) {
                 return null;
             } else {
@@ -110,15 +129,15 @@ public final class Types {
         }
 
         @Override
-        public void write(JsonObject object, String name, Long value) {
-            object.addProperty(name, value);
+        public void write(ConfigSerializer<?> serializer, String name, Long value) {
+            ((Json.Serializer) serializer).object().addProperty(name, value);
         }
     };
 
     public static final Type<String> STRING_TYPE = new Type<>() {
         @Override
-        public @Nullable String read(JsonObject object, String name) {
-            final JsonElement element = object.get(name);
+        public @Nullable String read(ConfigDeserializer<?> deserializer, String name) {
+            final JsonElement element = ((Json.Deserializer) deserializer).object().get(name);
             if (element == null || !element.isJsonPrimitive() || (element instanceof final JsonPrimitive primitive && !primitive.isString())) {
                 return null;
             } else {
@@ -127,8 +146,8 @@ public final class Types {
         }
 
         @Override
-        public void write(JsonObject object, String name, String value) {
-            object.addProperty(name, value);
+        public void write(ConfigSerializer<?> serializer, String name, String value) {
+            ((Json.Serializer) serializer).object().addProperty(name, value);
         }
     };
 

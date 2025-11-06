@@ -24,11 +24,12 @@
 
 package org.visuals.legacy.lightconfig.lib.v1.type;
 
-import com.google.gson.JsonObject;
 import org.jetbrains.annotations.Nullable;
+import org.visuals.legacy.lightconfig.lib.v1.serialization.ConfigDeserializer;
+import org.visuals.legacy.lightconfig.lib.v1.serialization.ConfigSerializer;
 
 public abstract class Type<T> {
-    public abstract @Nullable T read(JsonObject object, String name);
+    public abstract @Nullable T read(ConfigDeserializer<?> deserializer, String name);
 
-    public abstract void write(JsonObject object, String name, T value);
+    public abstract void write(ConfigSerializer<?> serializer, String name, T value);
 }

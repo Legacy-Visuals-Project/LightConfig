@@ -24,9 +24,10 @@
 
 package org.visuals.legacy.lightconfig.lib.v1.field;
 
-import com.google.gson.JsonObject;
 import net.minecraft.client.gui.components.AbstractWidget;
 import org.visuals.legacy.lightconfig.lib.v1.Config;
+import org.visuals.legacy.lightconfig.lib.v1.serialization.ConfigDeserializer;
+import org.visuals.legacy.lightconfig.lib.v1.serialization.ConfigSerializer;
 import org.visuals.legacy.lightconfig.lib.v1.type.Types;
 
 public class StringConfigField extends AbstractConfigField<String> {
@@ -35,8 +36,8 @@ public class StringConfigField extends AbstractConfigField<String> {
     }
 
     @Override
-    public void load(JsonObject object) throws Exception {
-        final String value = Types.STRING_TYPE.read(object, this.name);
+    public void load(ConfigDeserializer<?> deserializer) throws Exception {
+        final String value = Types.STRING_TYPE.read(deserializer, this.name);
         if (value == null) {
             throw new Exception("Failed to load value for '" + this.name + "'");
         } else {
@@ -45,8 +46,8 @@ public class StringConfigField extends AbstractConfigField<String> {
     }
 
     @Override
-    public void save(JsonObject object) {
-        Types.STRING_TYPE.write(object, this.name, this.value);
+    public void save(ConfigSerializer<?> serializer) {
+        Types.STRING_TYPE.write(serializer, this.name, this.value);
     }
 
     @Override

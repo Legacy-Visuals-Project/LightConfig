@@ -24,7 +24,6 @@
 
 package org.visuals.legacy.lightconfig.lib.v1;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.gui.screens.Screen;
@@ -47,21 +46,22 @@ public abstract class Config {
     protected final List<AbstractConfigField<?>> configFields = new ArrayList<>();
     protected final ModContainer modContainer;
     protected final Path path;
-    protected final ConfigSerializer<?> serializer;
-    protected final ConfigDeserializer<?> deserializer;
+    protected final Json.Serializer serializer;
+    protected final Json.Deserializer deserializer;
 
     public Config(ModContainer modContainer, Path path, ConfigSerializer<?> serializer, ConfigDeserializer<?> deserializer) {
         this.modContainer = modContainer;
         this.path = path;
-        this.serializer = serializer;
-        this.deserializer = deserializer;
-        if (this.serializer != Json.SERIALIZER || this.deserializer != Json.DESERIALIZER) {
+        if (!(serializer instanceof Json.Serializer && deserializer instanceof Json.Deserializer)) {
             throw new RuntimeException("Only json serialization is currently supported! Please use Json.SERIALIZER/Json.DESERIALIZER!");
         }
+
+        this.serializer = (Json.Serializer) serializer;
+        this.deserializer = (Json.Deserializer) deserializer;
     }
 
     public Config(ModContainer modContainer, Path path) {
-        this(modContainer, path, Json.SERIALIZER, Json.DESERIALIZER);
+        this(modContainer, path, new Json.Serializer(), new Json.Deserializer());
     }
 
     public BooleanConfigField booleanFieldOf(final String name, final boolean defaultValue) {
@@ -98,17 +98,18 @@ public abstract class Config {
         boolean success = true;
         try {
             final String json = Files.readString(this.path);
-            final JsonObject object = ((JsonElement) this.deserializer.deserialize(json)).getAsJsonObject();
+            final JsonObject object = this.deserializer.deserialize(json).getAsJsonObject();
             if (object == null) {
                 this.logger.warn("Failed to load config! Defaulting to original settings.");
                 success = false;
             } else {
+                this.deserializer.withObject(object);
                 this.configFields.forEach(field -> {
                     try {
                         if (!object.has(field.getName())) {
                             throw new Exception("Failed to load value for '" + field.getName() + "', object didn't contain a value for it.");
                         } else {
-                            field.load(object);
+                            field.load(this.deserializer);
                         }
                     } catch (Exception exception) {
                         this.logger.warn(exception.getMessage());
@@ -127,16 +128,17 @@ public abstract class Config {
 
     public void save() {
         final JsonObject object = new JsonObject();
+        this.serializer.withObject(object);
         this.configFields.forEach(field -> {
             try {
-                field.save(object);
+                field.save(this.serializer);
             } catch (Exception ignored) {
                 this.logger.warn("Failed to save config field '{}'!", field.getName());
             }
         });
 
         try {
-            Files.write(this.path, ((ConfigSerializer<JsonElement>) this.serializer).serialize(object));
+            Files.write(this.path, this.serializer.serialize(object));
         } catch (Exception ignored) {
             this.logger.warn("Failed to save config!");
             return;

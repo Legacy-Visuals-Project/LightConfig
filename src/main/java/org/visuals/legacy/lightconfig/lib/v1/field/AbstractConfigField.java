@@ -27,6 +27,8 @@ package org.visuals.legacy.lightconfig.lib.v1.field;
 import com.google.gson.JsonObject;
 import net.minecraft.client.gui.components.AbstractWidget;
 import org.visuals.legacy.lightconfig.lib.v1.Config;
+import org.visuals.legacy.lightconfig.lib.v1.serialization.ConfigDeserializer;
+import org.visuals.legacy.lightconfig.lib.v1.serialization.ConfigSerializer;
 
 public abstract class AbstractConfigField<T> {
     protected final Config config;
@@ -41,10 +43,9 @@ public abstract class AbstractConfigField<T> {
         this.defaultValue = defaultValue;
     }
 
-    // TODO/Swap w/ serializer/deserializer
-    public abstract void load(JsonObject object) throws Exception;
+    public abstract void load(ConfigDeserializer<?> deserializer) throws Exception;
 
-    public abstract void save(JsonObject object) throws Exception;
+    public abstract void save(ConfigSerializer<?> serializer) throws Exception;
 
     public abstract AbstractWidget createWidget();
 

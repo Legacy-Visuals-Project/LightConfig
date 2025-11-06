@@ -25,7 +25,6 @@
 package org.visuals.legacy.lightconfig.lib.v1.field;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
@@ -36,18 +35,18 @@ import org.visuals.legacy.lightconfig.lib.v1.Config;
 import org.visuals.legacy.lightconfig.lib.v1.Translations;
 import org.visuals.legacy.lightconfig.lib.v1.serialization.ConfigDeserializer;
 import org.visuals.legacy.lightconfig.lib.v1.serialization.ConfigSerializer;
+import org.visuals.legacy.lightconfig.lib.v1.serialization.Json;
 import org.visuals.legacy.lightconfig.lib.v1.type.Type;
 
 import java.util.Arrays;
-import java.util.Optional;
 
 public class EnumConfigField<T extends Enum<T>> extends AbstractConfigField<T> {
     private final Class<T> enumClazz;
 
     private final Type<T> ENUM_TYPE = new Type<>() {
         @Override
-        public @Nullable T read(JsonObject object, String name) {
-            final JsonElement element = object.get(name);
+        public @Nullable T read(ConfigDeserializer<?> deserializer, String name) {
+            final JsonElement element = ((Json.Deserializer) deserializer).object().get(name);
             if (element == null || !element.isJsonPrimitive() || (element instanceof final JsonPrimitive primitive && !primitive.isString())) {
                 return null;
             } else {
@@ -59,8 +58,8 @@ public class EnumConfigField<T extends Enum<T>> extends AbstractConfigField<T> {
         }
 
         @Override
-        public void write(JsonObject object, String name, T value) {
-            object.addProperty(name, value.name());
+        public void write(ConfigSerializer<?> serializer, String name, T value) {
+            ((Json.Serializer) serializer).object().addProperty(name, value.name());
         }
     };
 
@@ -70,8 +69,8 @@ public class EnumConfigField<T extends Enum<T>> extends AbstractConfigField<T> {
     }
 
     @Override
-    public void load(JsonObject object) throws Exception {
-        final T value = ENUM_TYPE.read(object, this.name);
+    public void load(ConfigDeserializer<?> deserializer) throws Exception {
+        final T value = ENUM_TYPE.read(deserializer, this.name);
         if (value == null) {
             throw new Exception("Failed to load value for '" + this.name + "'");
         } else {
@@ -80,8 +79,8 @@ public class EnumConfigField<T extends Enum<T>> extends AbstractConfigField<T> {
     }
 
     @Override
-    public void save(JsonObject object) {
-        ENUM_TYPE.write(object, this.name, this.value);
+    public void save(ConfigSerializer<?> serializer) {
+        ENUM_TYPE.write(serializer, this.name, this.value);
     }
 
     @Override
