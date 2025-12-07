@@ -1,18 +1,33 @@
 {
 	"schemaVersion": 1,
-	"id": "lightconfig",
+	"id": "${id}",
 	"version": "${version}",
-	"name": "LightConfig",
-	"description": "${mod_description}",
+	"name": "${name}",
+	"description": "${description}",
 	"authors": [
 		"lowercasebtw",
 		"mixces"
 	],
-	"license": "GPL-3.0-with-linking-exception",
-	"icon": "assets/lightconfig/icon.png",
+	"contact": {
+		"sources": "${source}",
+		"issues": "${issues}"
+	},
+	"license": "${license}",
+	"icon": "assets/${id}/icon.png",
 	"environment": "client",
 	"depends": {
-		"fabricloader": "*",
-		"minecraft": ">=1.21"
+		"fabricloader": ">=${fabric_loader_version}",
+		"minecraft": "${minecraft_version_range}",
+		"fabric-api": "*"
+	},
+	"custom": {
+		"modmenu": {
+			"links": {
+				"modmenu.discord": "${discord}",
+				"modmenu.modrinth": "${modrinth}",
+				"modmenu.curseforge": "${curseforge}"
+			},
+			"update_checker": true
+		}
 	}
 }

@@ -24,7 +24,6 @@
 
 package org.visuals.legacy.lightconfig.lib.v1.field;
 
-import com.google.gson.JsonObject;
 import net.minecraft.client.gui.components.AbstractWidget;
 import org.visuals.legacy.lightconfig.lib.v1.Config;
 import org.visuals.legacy.lightconfig.lib.v1.serialization.ConfigDeserializer;
@@ -33,8 +32,8 @@ import org.visuals.legacy.lightconfig.lib.v1.serialization.ConfigSerializer;
 public abstract class AbstractConfigField<T> {
     protected final Config config;
     protected final String name;
-    protected T value;
     protected final T defaultValue;
+    protected T value;
 
     public AbstractConfigField(final Config config, final String name, final T defaultValue) {
         this.config = config;
@@ -61,12 +60,12 @@ public abstract class AbstractConfigField<T> {
         return value;
     }
 
-    public T getDefaultValue() {
-        return this.defaultValue;
-    }
-
     public void setValue(T value) {
         this.value = value;
+    }
+
+    public T getDefaultValue() {
+        return this.defaultValue;
     }
 
     public void restore() {
