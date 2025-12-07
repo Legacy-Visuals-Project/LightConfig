@@ -1,7 +1,9 @@
 # LightConfig
 
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/C0C31INYGG)
+
 W.I.P - Work in progress, not done.
-Join our discord: https://discord.gg/zqnXSUqedW
+Join our discord: https://discord.gg/C8KKgbA8jy
 
 ## License
 
