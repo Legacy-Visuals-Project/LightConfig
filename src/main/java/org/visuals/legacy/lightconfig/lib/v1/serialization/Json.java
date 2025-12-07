@@ -28,7 +28,13 @@ import com.google.gson.*;
 import org.jetbrains.annotations.Nullable;
 
 public class Json {
-    protected static final Gson GSON = new GsonBuilder().setPrettyPrinting().setStrictness(Strictness.LENIENT).create();
+    protected static final Gson GSON = new GsonBuilder().setPrettyPrinting()
+            //? >=1.21.4 {
+            .setStrictness(Strictness.LENIENT)
+            //?} else {
+            /*.setLenient()
+             *///?}
+            .create();
 
     public static class Serializer extends ConfigSerializer<JsonElement> {
         private JsonObject object = new JsonObject();

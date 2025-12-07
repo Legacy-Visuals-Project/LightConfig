@@ -1,3 +1,5 @@
+import com.google.devtools.ksp.processing.parseBoolean
+
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.loom)
@@ -26,7 +28,7 @@ class ModData {
     val modrinth = property("mod.modrinth") as String
     val curseforge = property("mod.curseforge") as String
     val discord = property("mod.discord") as String
-
+    val obfuscated = parseBoolean(property("mod.obfuscated").toString())
     val minecraftVersion = property("mod.minecraft_version") as String
     val minecraftVersionRange = property("mod.minecraft_version_range") as String
 }
@@ -35,7 +37,6 @@ class Dependencies {
     val fabricLoaderVersion = property("deps.fabric_loader_version") as String?
 
     val devAuthVersion = property("deps.devauth_version") as String?
-    val lombokVersion = property("deps.lombok_version") as String?
 
     // Versioned
     val neoForgeVersion = property("deps.neoforge_version") as String?
@@ -126,8 +127,6 @@ dependencies {
         }
     })
 
-    compileOnly("org.projectlombok:lombok:${deps.lombokVersion}")
-    annotationProcessor("org.projectlombok:lombok:${deps.lombokVersion}")
     modRuntimeOnly("me.djtheredstoner:DevAuth-${loader.name}:${deps.devAuthVersion}")
 
     if (loader.isFabric) {
