@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.blossom)
     alias(libs.plugins.ksp)
     alias(libs.plugins.fletchingtable.fabric)
+    id("maven-publish")
 }
 
 repositories {
@@ -53,9 +54,10 @@ val mod = ModData()
 val deps = Dependencies()
 val loader = LoaderData()
 
+val versionString = "${mod.version}-${mod.minecraftVersion}_${loader.name}"
 group = mod.group
-base { 
-    archivesName.set("${mod.id}-${mod.version}+${mod.minecraftVersion}-${loader.name}") 
+base {
+    archivesName.set("${mod.id}-${versionString}")
 }
 
 java {
@@ -191,6 +193,19 @@ tasks {
         into(rootProject.layout.buildDirectory.file("libs/${project.property("mod.version")}"))
         dependsOn("build")
     }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            artifactId = mod.id
+            group = project.group
+            version = versionString
+            from(components["java"])
+        }
+    }
+
+    repositories {}
 }
 
 if (stonecutter.current.isActive) {
