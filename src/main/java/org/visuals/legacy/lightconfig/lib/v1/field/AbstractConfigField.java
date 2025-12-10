@@ -26,49 +26,61 @@ package org.visuals.legacy.lightconfig.lib.v1.field;
 
 import net.minecraft.client.gui.components.AbstractWidget;
 import org.visuals.legacy.lightconfig.lib.v1.Config;
+import org.visuals.legacy.lightconfig.lib.v1.events.ConfigValueChanged;
+import org.visuals.legacy.lightconfig.lib.v1.events.EventManager;
 import org.visuals.legacy.lightconfig.lib.v1.serialization.ConfigDeserializer;
 import org.visuals.legacy.lightconfig.lib.v1.serialization.ConfigSerializer;
 
+import java.util.function.BiConsumer;
+
 public abstract class AbstractConfigField<T> {
-    protected final Config config;
-    protected final String name;
-    protected final T defaultValue;
-    protected T value;
+	protected final Config config;
+	protected final String name;
+	protected final T defaultValue;
+	protected T value;
+	protected EventManager eventManager;
 
-    public AbstractConfigField(final Config config, final String name, final T defaultValue) {
-        this.config = config;
-        this.name = name;
-        this.value = defaultValue;
-        this.defaultValue = defaultValue;
-    }
+	public AbstractConfigField(final Config config, final String name, final T defaultValue) {
+		this.config = config;
+		this.name = name;
+		this.value = defaultValue;
+		this.defaultValue = defaultValue;
+	}
 
-    public abstract void load(ConfigDeserializer<?> deserializer) throws Exception;
+	public abstract void load(ConfigDeserializer<?> deserializer) throws Exception;
 
-    public abstract void save(ConfigSerializer<?> serializer) throws Exception;
+	public abstract void save(ConfigSerializer<?> serializer) throws Exception;
 
-    public abstract AbstractWidget createWidget();
+	public abstract AbstractWidget createWidget();
 
-    public String getTranslationKey() {
-        return String.format("options.%s.%s", this.config.getModContainer().getMetadata().getId(), this.getName());
-    }
+	public String getTranslationKey() {
+		return String.format("options.%s.%s", this.config.getModContainer().getMetadata().getId(), this.getName());
+	}
 
-    public String getName() {
-        return name;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public T getValue() {
-        return value;
-    }
+	public T getValue() {
+		return value;
+	}
 
-    public void setValue(T value) {
-        this.value = value;
-    }
+	public void setValue(T value) {
+		this.eventManager.dispatch(new ConfigValueChanged<>(this.value, value));
+		this.value = value;
+	}
 
-    public T getDefaultValue() {
-        return this.defaultValue;
-    }
+	public T getDefaultValue() {
+		return this.defaultValue;
+	}
 
-    public void restore() {
-        this.setValue(this.getDefaultValue());
-    }
+	public void restore() {
+		this.setValue(this.getDefaultValue());
+	}
+
+	public void onValueChanged(BiConsumer<T, T> biConsumer) {
+		this.eventManager.listen(ConfigValueChanged.class, event -> {
+			biConsumer.accept((T) event.getOldValue(), (T) event.getNewValue());
+		});
+	}
 }
