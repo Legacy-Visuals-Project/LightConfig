@@ -38,7 +38,7 @@ public abstract class AbstractConfigField<T> {
 	protected final String name;
 	protected final T defaultValue;
 	protected T value;
-	protected EventManager eventManager;
+	protected EventManager eventManager = new EventManager();
 
 	public AbstractConfigField(final Config config, final String name, final T defaultValue) {
 		this.config = config;
