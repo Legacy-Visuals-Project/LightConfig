@@ -25,7 +25,6 @@
 package org.visuals.legacy.lightconfig.lib.v1;
 
 import com.google.gson.JsonObject;
-import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -42,132 +41,126 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Config {
-    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
-    protected final List<AbstractConfigField<?>> configFields = new ArrayList<>();
-    protected final ModContainer modContainer;
-    protected final Path path;
-    protected final Json.Serializer serializer;
-    protected final Json.Deserializer deserializer;
+	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
+	protected final List<AbstractConfigField<?>> configFields = new ArrayList<>();
+	protected final Path path;
+	protected final Json.Serializer serializer;
+	protected final Json.Deserializer deserializer;
 
-    public Config(ModContainer modContainer, Path path, ConfigSerializer<?> serializer, ConfigDeserializer<?> deserializer) {
-        this.modContainer = modContainer;
-        this.path = path;
-        if (!(serializer instanceof Json.Serializer && deserializer instanceof Json.Deserializer)) {
-            throw new RuntimeException("Only json serialization is currently supported! Please use Json.SERIALIZER/Json.DESERIALIZER!");
-        }
+	public Config(final Path path, final ConfigSerializer<?> serializer, final ConfigDeserializer<?> deserializer) {
+		this.path = path;
+		if (!(serializer instanceof Json.Serializer && deserializer instanceof Json.Deserializer)) {
+			throw new RuntimeException("Only json serialization is currently supported! Please use Json.SERIALIZER/Json.DESERIALIZER!");
+		}
 
-        this.serializer = (Json.Serializer) serializer;
-        this.deserializer = (Json.Deserializer) deserializer;
-    }
+		this.serializer = (Json.Serializer) serializer;
+		this.deserializer = (Json.Deserializer) deserializer;
+	}
 
-    public Config(ModContainer modContainer, Path path) {
-        this(modContainer, path, new Json.Serializer(), new Json.Deserializer());
-    }
+	public Config(final Path path) {
+		this(path, new Json.Serializer(), new Json.Deserializer());
+	}
 
-    public BooleanConfigField booleanFieldOf(final String name, final boolean defaultValue) {
-        final BooleanConfigField field = new BooleanConfigField(this, name, defaultValue);
-        this.configFields.add(field);
-        return field;
-    }
+	public BooleanConfigField booleanFieldOf(final String name, final boolean defaultValue) {
+		final BooleanConfigField field = new BooleanConfigField(this, name, defaultValue);
+		this.configFields.add(field);
+		return field;
+	}
 
-    public StringConfigField stringFieldOf(final String name, final String defaultValue) {
-        final StringConfigField field = new StringConfigField(this, name, defaultValue);
-        this.configFields.add(field);
-        return field;
-    }
+	public StringConfigField stringFieldOf(final String name, final String defaultValue) {
+		final StringConfigField field = new StringConfigField(this, name, defaultValue);
+		this.configFields.add(field);
+		return field;
+	}
 
-    public <T extends Number> NumericConfigField<T> numericFieldOf(final String name, final Type<T> type, final T defaultValue) {
-        final NumericConfigField<T> field = new NumericConfigField<>(this, type, name, defaultValue);
-        this.configFields.add(field);
-        return field;
-    }
+	public <T extends Number> NumericConfigField<T> numericFieldOf(final String name, final Type<T> type, final T defaultValue) {
+		final NumericConfigField<T> field = new NumericConfigField<>(this, type, name, defaultValue);
+		this.configFields.add(field);
+		return field;
+	}
 
-    public <T extends Enum<T>> EnumConfigField<T> enumFieldOf(final String name, final T defaultValue, final Class<T> clazz) {
-        final EnumConfigField<T> field = new EnumConfigField<>(this, name, defaultValue, clazz);
-        this.configFields.add(field);
-        return field;
-    }
+	public <T extends Enum<T>> EnumConfigField<T> enumFieldOf(final String name, final T defaultValue, final Class<T> clazz) {
+		final EnumConfigField<T> field = new EnumConfigField<>(this, name, defaultValue, clazz);
+		this.configFields.add(field);
+		return field;
+	}
 
-    public void load() {
-        if (!this.path.toFile().exists()) {
-            this.logger.info("Config file doesn't exist! Creating one...");
-            this.save();
-            return;
-        }
+	public void load() {
+		if (!this.path.toFile().exists()) {
+			this.logger.info("Config file doesn't exist! Creating one...");
+			this.save();
+			return;
+		}
 
-        boolean success = true;
-        try {
-            final String json = Files.readString(this.path);
-            final JsonObject object = this.deserializer.deserialize(json).getAsJsonObject();
-            if (object == null) {
-                this.logger.warn("Failed to load config! Defaulting to original settings.");
-                success = false;
-            } else {
-                this.deserializer.withObject(object);
-                this.configFields.forEach(field -> {
-                    try {
-                        if (!object.has(field.getName())) {
-                            throw new Exception("Failed to load value for '" + field.getName() + "', object didn't contain a value for it.");
-                        } else {
-                            field.load(this.deserializer);
-                        }
-                    } catch (Exception exception) {
-                        this.logger.warn(exception.getMessage());
-                    }
-                });
-            }
-        } catch (Exception ignored) {
-            this.logger.warn("Failed to load config! Error occured when reading file.");
-            return;
-        }
+		boolean success = true;
+		try {
+			final String json = Files.readString(this.path);
+			final JsonObject object = this.deserializer.deserialize(json).getAsJsonObject();
+			if (object == null) {
+				this.logger.warn("Failed to load config! Defaulting to original settings.");
+				success = false;
+			} else {
+				this.deserializer.withObject(object);
+				this.configFields.forEach(field -> {
+					try {
+						if (!object.has(field.getName())) {
+							throw new Exception("Failed to load value for '" + field.getName() + "', object didn't contain a value for it.");
+						} else {
+							field.load(this.deserializer);
+						}
+					} catch (Exception exception) {
+						this.logger.warn(exception.getMessage());
+					}
+				});
+			}
+		} catch (Exception ignored) {
+			this.logger.warn("Failed to load config! Error occured when reading file.");
+			return;
+		}
 
-        if (success) {
-            this.logger.info("Config successfully loaded!");
-        }
-    }
+		if (success) {
+			this.logger.info("Config successfully loaded!");
+		}
+	}
 
-    public void save() {
-        final JsonObject object = new JsonObject();
-        this.serializer.withObject(object);
-        this.configFields.forEach(field -> {
-            try {
-                field.save(this.serializer);
-            } catch (Exception ignored) {
-                this.logger.warn("Failed to save config field '{}'!", field.getName());
-            }
-        });
+	public void save() {
+		final JsonObject object = new JsonObject();
+		this.serializer.withObject(object);
+		this.configFields.forEach(field -> {
+			try {
+				field.save(this.serializer);
+			} catch (Exception ignored) {
+				this.logger.warn("Failed to save config field '{}'!", field.getName());
+			}
+		});
 
-        try {
-            Files.write(this.path, this.serializer.serialize(object));
-        } catch (Exception ignored) {
-            this.logger.warn("Failed to save config!");
-            return;
-        }
+		try {
+			Files.write(this.path, this.serializer.serialize(object));
+		} catch (Exception ignored) {
+			this.logger.warn("Failed to save config!");
+			return;
+		}
 
-        this.logger.info("Config successfully saved!");
-    }
+		this.logger.info("Config successfully saved!");
+	}
 
-    public void reset() {
-        // TODO: When implementing the screen system/idk, implement a event listener for like reload resource packs or whatever
-        this.configFields.forEach(AbstractConfigField::restore);
-        this.save();
-    }
+	public void reset() {
+		// TODO: When implementing the screen system/idk, implement a event listener for like reload resource packs or whatever
+		this.configFields.forEach(AbstractConfigField::restore);
+		this.save();
+	}
 
-    public Logger getLogger() {
-        return logger;
-    }
+	public Logger getLogger() {
+		return logger;
+	}
 
-    public List<AbstractConfigField<?>> getConfigFields() {
-        return configFields;
-    }
+	public List<AbstractConfigField<?>> getConfigFields() {
+		return configFields;
+	}
 
-    public ModContainer getModContainer() {
-        return this.modContainer;
-    }
+	public Path getPath() {
+		return path;
+	}
 
-    public Path getPath() {
-        return path;
-    }
-
-    public abstract Screen getConfigScreen(@Nullable Screen parent);
+	public abstract Screen getConfigScreen(@Nullable Screen parent);
 }

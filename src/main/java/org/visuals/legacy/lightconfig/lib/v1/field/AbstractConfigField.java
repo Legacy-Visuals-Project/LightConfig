@@ -54,7 +54,7 @@ public abstract class AbstractConfigField<T> {
 	public abstract AbstractWidget createWidget();
 
 	public String getTranslationKey() {
-		return String.format("options.%s.%s", this.config.getModContainer().getMetadata().getId(), this.getName());
+		return String.format("options.%s.%s", this.config.getPath().getFileName().toString(), this.getName());
 	}
 
 	public String getName() {
