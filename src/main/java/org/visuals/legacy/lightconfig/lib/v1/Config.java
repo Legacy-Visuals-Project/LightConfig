@@ -43,11 +43,13 @@ import java.util.List;
 public abstract class Config {
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	protected final List<AbstractConfigField<?>> configFields = new ArrayList<>();
+	protected final String id;
 	protected final Path path;
 	protected final Json.Serializer serializer;
 	protected final Json.Deserializer deserializer;
 
-	public Config(final Path path, final ConfigSerializer<?> serializer, final ConfigDeserializer<?> deserializer) {
+	public Config(final String id, final Path path, final ConfigSerializer<?> serializer, final ConfigDeserializer<?> deserializer) {
+		this.id = id;
 		this.path = path;
 		if (!(serializer instanceof Json.Serializer && deserializer instanceof Json.Deserializer)) {
 			throw new RuntimeException("Only json serialization is currently supported! Please use Json.SERIALIZER/Json.DESERIALIZER!");
@@ -57,8 +59,8 @@ public abstract class Config {
 		this.deserializer = (Json.Deserializer) deserializer;
 	}
 
-	public Config(final Path path) {
-		this(path, new Json.Serializer(), new Json.Deserializer());
+	public Config(final String id, final Path path) {
+		this(id, path, new Json.Serializer(), new Json.Deserializer());
 	}
 
 	public BooleanConfigField booleanFieldOf(final String name, final boolean defaultValue) {
@@ -156,6 +158,10 @@ public abstract class Config {
 
 	public List<AbstractConfigField<?>> getConfigFields() {
 		return configFields;
+	}
+
+	public String getId() {
+		return id;
 	}
 
 	public Path getPath() {
