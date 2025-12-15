@@ -25,6 +25,7 @@
 package org.visuals.legacy.lightconfig.lib.v1;
 
 import com.google.gson.JsonObject;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -35,8 +36,8 @@ import org.visuals.legacy.lightconfig.lib.v1.serialization.ConfigSerializer;
 import org.visuals.legacy.lightconfig.lib.v1.serialization.Json;
 import org.visuals.legacy.lightconfig.lib.v1.type.Type;
 
+import java.io.File;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,13 +45,13 @@ public abstract class Config {
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	protected final List<AbstractConfigField<?>> configFields = new ArrayList<>();
 	protected final String id;
-	protected final Path path;
+	protected final File configFile;
 	protected final Json.Serializer serializer;
 	protected final Json.Deserializer deserializer;
 
-	public Config(final String id, final Path path, final ConfigSerializer<?> serializer, final ConfigDeserializer<?> deserializer) {
+	public Config(final String id, final ConfigSerializer<?> serializer, final ConfigDeserializer<?> deserializer) {
 		this.id = id;
-		this.path = path;
+		this.configFile = FabricLoader.getInstance().getConfigDir().resolve(id + ".json").toFile();
 		if (!(serializer instanceof Json.Serializer && deserializer instanceof Json.Deserializer)) {
 			throw new RuntimeException("Only json serialization is currently supported! Please use Json.SERIALIZER/Json.DESERIALIZER!");
 		}
@@ -59,8 +60,8 @@ public abstract class Config {
 		this.deserializer = (Json.Deserializer) deserializer;
 	}
 
-	public Config(final String id, final Path path) {
-		this(id, path, new Json.Serializer(), new Json.Deserializer());
+	public Config(final String id) {
+		this(id, new Json.Serializer(), new Json.Deserializer());
 	}
 
 	public BooleanConfigField booleanFieldOf(final String name, final boolean defaultValue) {
@@ -88,7 +89,7 @@ public abstract class Config {
 	}
 
 	public void load() {
-		if (!this.path.toFile().exists()) {
+		if (!this.configFile.exists()) {
 			this.logger.info("Config file doesn't exist! Creating one...");
 			this.save();
 			return;
@@ -96,7 +97,7 @@ public abstract class Config {
 
 		boolean success = true;
 		try {
-			final String json = Files.readString(this.path);
+			final String json = Files.readString(this.configFile.toPath());
 			final JsonObject object = this.deserializer.deserialize(json).getAsJsonObject();
 			if (object == null) {
 				this.logger.warn("Failed to load config! Defaulting to original settings.");
@@ -137,7 +138,7 @@ public abstract class Config {
 		});
 
 		try {
-			Files.write(this.path, this.serializer.serialize(object));
+			Files.write(this.configFile.toPath(), this.serializer.serialize(object));
 		} catch (Exception ignored) {
 			this.logger.warn("Failed to save config!");
 			return;
@@ -147,7 +148,6 @@ public abstract class Config {
 	}
 
 	public void reset() {
-		// TODO: When implementing the screen system/idk, implement a event listener for like reload resource packs or whatever
 		this.configFields.forEach(AbstractConfigField::restore);
 		this.save();
 	}
@@ -161,11 +161,11 @@ public abstract class Config {
 	}
 
 	public String getId() {
-		return id;
+		return this.id;
 	}
 
-	public Path getPath() {
-		return path;
+	public File getConfigFile() {
+		return this.configFile;
 	}
 
 	public abstract Screen getConfigScreen(@Nullable Screen parent);

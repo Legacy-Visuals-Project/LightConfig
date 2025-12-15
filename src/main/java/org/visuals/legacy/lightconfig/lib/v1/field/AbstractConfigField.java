@@ -26,6 +26,7 @@ package org.visuals.legacy.lightconfig.lib.v1.field;
 
 import net.minecraft.client.gui.components.AbstractWidget;
 import org.visuals.legacy.lightconfig.lib.v1.Config;
+import org.visuals.legacy.lightconfig.lib.v1.events.ConfigFieldReset;
 import org.visuals.legacy.lightconfig.lib.v1.events.ConfigValueChanged;
 import org.visuals.legacy.lightconfig.lib.v1.events.EventManager;
 import org.visuals.legacy.lightconfig.lib.v1.serialization.ConfigDeserializer;
@@ -75,12 +76,11 @@ public abstract class AbstractConfigField<T> {
 	}
 
 	public void restore() {
+		this.eventManager.dispatch(new ConfigFieldReset(this));
 		this.setValue(this.getDefaultValue());
 	}
 
 	public void onValueChanged(BiConsumer<T, T> biConsumer) {
-		this.eventManager.listen(ConfigValueChanged.class, event -> {
-			biConsumer.accept((T) event.getOldValue(), (T) event.getNewValue());
-		});
+		this.eventManager.listen(ConfigValueChanged.class, event -> biConsumer.accept((T) event.getOldValue(), (T) event.getNewValue()));
 	}
 }
