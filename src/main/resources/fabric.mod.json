@@ -27,6 +27,7 @@
 				"modmenu.modrinth": "${modrinth}",
 				"modmenu.curseforge": "${curseforge}"
 			},
+			"badges": [ "library" ],
 			"update_checker": true
 		}
 	}
