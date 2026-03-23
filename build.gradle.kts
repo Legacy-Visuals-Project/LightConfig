@@ -1,20 +1,19 @@
+@file:OptIn(StonecutterExperimentalAPI::class)
+
 import com.google.devtools.ksp.processing.parseBoolean
+import dev.kikugie.stonecutter.StonecutterExperimentalAPI
+import net.fabricmc.loom.api.LoomGradleExtensionAPI
+import net.fabricmc.loom.api.fabricapi.FabricApiExtension
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.loom)
+    alias(libs.plugins.loom) apply false
+    alias(libs.plugins.loom.remap) apply false
     alias(libs.plugins.publishing)
     alias(libs.plugins.blossom)
     alias(libs.plugins.ksp)
     alias(libs.plugins.fletchingtable.fabric)
     id("maven-publish")
-}
-
-repositories {
-    maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1") // DevAuth
-    maven("https://maven.parchmentmc.org") // Parchment
-    maven("https://maven.neoforged.net/releases") // NeoForge
-    maven("https://maven.terraformersmc.com/") // Mod Menu
 }
 
 class ModData {
@@ -29,7 +28,7 @@ class ModData {
     val modrinth = property("mod.modrinth") as String
     val curseforge = property("mod.curseforge") as String
     val discord = property("mod.discord") as String
-    val obfuscated = parseBoolean(property("mod.obfuscated").toString())
+    val obfuscated = parseBoolean(property("mod.obfuscated") as String)
     val minecraftVersion = property("mod.minecraft_version") as String
     val minecraftVersionRange = property("mod.minecraft_version_range") as String
 }
@@ -44,32 +43,28 @@ class Dependencies {
     val fabricApiVersion = property("deps.fabric_api_version") as String?
 }
 
-class LoaderData {
-    val name = loom.platform.get().name.lowercase()
-    val isFabric = name == "fabric"
-    val isNeoForge = name == "neoforge"
-}
-
 val mod = ModData()
 val deps = Dependencies()
+
+// Apply specific loom
+if (mod.obfuscated) {
+    apply(plugin = "net.fabricmc.fabric-loom-remap")
+} else {
+    apply(plugin = "net.fabricmc.fabric-loom")
+}
+
+class LoaderData {
+    val name = property("loader.platform") as String?
+    val isFabric = "fabric".equals(name, ignoreCase = true)
+    val isNeoForge = "neoforge".equals(name, ignoreCase = true)
+}
+
 val loader = LoaderData()
 
 val versionString = "${mod.version}-${mod.minecraftVersion}_${loader.name}"
 group = mod.group
 base {
     archivesName.set("${mod.id}-${versionString}")
-}
-
-java {
-    val requiredJava = when {
-        stonecutter.eval(stonecutter.current.version, ">=1.20.6") -> JavaVersion.VERSION_21
-        stonecutter.eval(stonecutter.current.version, ">=1.18") -> JavaVersion.VERSION_17
-        stonecutter.eval(stonecutter.current.version, ">=1.17") -> JavaVersion.VERSION_16
-        else -> JavaVersion.VERSION_1_8
-    }
-
-    sourceCompatibility = requiredJava
-    targetCompatibility = requiredJava
 }
 
 stonecutter {
@@ -79,33 +74,21 @@ stonecutter {
     }
 }
 
-val currentCommitHash: String by lazy {
-    Runtime.getRuntime()
-        .exec("git rev-parse --verify --short HEAD", null, rootDir)
-        .inputStream.bufferedReader().readText().trim()
-}
-
-blossom {
-    replaceToken("@MODID@", mod.id)
-    replaceToken("@VERSION@", mod.version)
-    replaceToken("@COMMIT@", currentCommitHash)
-}
-
-loom {
-    silentMojangMappingsLicense()
+// loom {
+extensions.configure<LoomGradleExtensionAPI> {
     runConfigs.all {
         ideConfigGenerated(stonecutter.current.isActive)
         runDir = "../../run"
     }
 
     runConfigs.remove(runConfigs["server"]) // Removes server run configs
-}
 
-loom.runs {
-    afterEvaluate {
-        configureEach {
-            property("devauth.enabled", "true")
-            property("devauth.account", "main")
+    runs {
+        afterEvaluate {
+            configureEach {
+                property("devauth.enabled", "true")
+                property("devauth.account", "main")
+            }
         }
     }
 }
@@ -116,21 +99,41 @@ fletchingTable {
     }
 }
 
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1") // DevAuth
+    maven("https://maven.parchmentmc.org") // Parchment
+    maven("https://maven.neoforged.net/releases") // NeoForge
+    maven("https://maven.terraformersmc.com/") // Mod Menu
+}
+
+val loom: LoomGradleExtensionAPI by extensions
+val fabricApi: FabricApiExtension by extensions
+val minecraft by configurations.existing
+val include by configurations.existing
+val modImplementation: NamedDomainObjectProvider<Configuration> =
+    configurations.named(if (mod.obfuscated) "modImplementation" else "implementation")
+val modRuntimeOnly: NamedDomainObjectProvider<Configuration> =
+    configurations.named(if (mod.obfuscated) "modRuntimeOnly" else "runtimeOnly")
+
 dependencies {
     minecraft("com.mojang:minecraft:${mod.minecraftVersion}")
 
-    @Suppress("UnstableApiUsage")
-    mappings(loom.layered {
-        officialMojangMappings()
+    if (mod.obfuscated) {
+        val mappings by configurations.existing
 
-        // Parchment mappings (it adds parameter mappings & javadoc)
-        optionalProp("deps.parchment_version") {
-            parchment("org.parchmentmc.data:parchment-${mod.minecraftVersion}:$it@zip")
-        }
-    })
+        @Suppress("UnstableApiUsage")
+        mappings(loom.layered {
+            officialMojangMappings()
+
+            optionalProp("deps.parchment_version") {
+                parchment("org.parchmentmc.data:parchment-${mod.minecraftVersion}:$it@zip")
+            }
+        })
+    }
 
     modRuntimeOnly("me.djtheredstoner:DevAuth-${loader.name}:${deps.devAuthVersion}")
-
     if (loader.isFabric) {
         modImplementation("net.fabricmc:fabric-loader:${deps.fabricLoaderVersion}")!!
         modImplementation("net.fabricmc.fabric-api:fabric-api:${deps.fabricApiVersion}")
@@ -140,11 +143,33 @@ dependencies {
             }
         }
     } else if (loader.isNeoForge) {
-        "neoForge"("net.neoforged:neoforge:${deps.neoForgeVersion}")
+        // TODO: "neoForge"("net.neoforged:neoforge:${deps.neoForgeVersion}")
     }
 }
 
+val modrinthId = findProperty("publish.modrinth")?.toString()?.takeIf { it.isNotBlank() }
+val curseforgeId = findProperty("publish.curseforge")?.toString()?.takeIf { it.isNotBlank() }
+
+// accessTokens should be placed in the user Gradle gradle.properties file
+// for example, on Windows this would be "C:\Users\{user}\.gradle\gradle.properties"
+// then add:
+// modrinth.token=
+// curseforge.token=
+
 publishMods {
+}
+
+java {
+    val requiredJava = when {
+        stonecutter.eval(stonecutter.current.version, ">=26.1") -> JavaVersion.VERSION_25
+        stonecutter.eval(stonecutter.current.version, ">=1.20.5") -> JavaVersion.VERSION_21
+        stonecutter.eval(stonecutter.current.version, ">=1.18") -> JavaVersion.VERSION_17
+        stonecutter.eval(stonecutter.current.version, ">=1.17") -> JavaVersion.VERSION_16
+        else -> JavaVersion.VERSION_1_8
+    }
+
+    sourceCompatibility = requiredJava
+    targetCompatibility = requiredJava
 }
 
 tasks {
@@ -186,10 +211,14 @@ tasks {
         }
     }
 
-    // Builds the version into a shared folder in `build/libs/${mod version}/`
     register<Copy>("buildAndCollect") {
         group = "build"
-        from(remapJar.map { it.archiveFile }, remapSourcesJar.map { it.archiveFile })
+        if (mod.obfuscated) {
+            val remapJar by existing(net.fabricmc.loom.task.RemapJarTask::class)
+            val remapSourcesJar by existing(net.fabricmc.loom.task.RemapSourcesJarTask::class)
+            from(remapJar, remapSourcesJar)
+        }
+
         into(rootProject.layout.buildDirectory.file("libs/${project.property("mod.version")}"))
         dependsOn("build")
     }
@@ -206,6 +235,18 @@ publishing {
     }
 
     repositories {}
+}
+
+val currentCommitHash: String by lazy {
+    Runtime.getRuntime()
+        .exec(arrayOf("git", "rev-parse", "--verify", "--short", "HEAD"), null, rootDir)
+        .inputStream.bufferedReader().readText().trim()
+}
+
+blossom {
+    replaceToken("@MODID@", mod.id)
+    replaceToken("@VERSION@", mod.version)
+    replaceToken("@COMMIT_HASH@", currentCommitHash)
 }
 
 if (stonecutter.current.isActive) {
