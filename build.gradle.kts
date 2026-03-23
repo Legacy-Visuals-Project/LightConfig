@@ -155,7 +155,6 @@ val curseforgeId = findProperty("publish.curseforge")?.toString()?.takeIf { it.i
 // then add:
 // modrinth.token=
 // curseforge.token=
-
 publishMods {
 }
 
@@ -170,6 +169,9 @@ java {
 
     sourceCompatibility = requiredJava
     targetCompatibility = requiredJava
+    if (!mod.obfuscated) {
+        withSourcesJar()
+    }
 }
 
 tasks {
