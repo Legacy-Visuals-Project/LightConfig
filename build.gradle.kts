@@ -213,13 +213,17 @@ tasks {
 
     register<Copy>("buildAndCollect") {
         group = "build"
+
         if (mod.obfuscated) {
             val remapJar by existing(net.fabricmc.loom.task.RemapJarTask::class)
             val remapSourcesJar by existing(net.fabricmc.loom.task.RemapSourcesJarTask::class)
             from(remapJar, remapSourcesJar)
+        } else {
+            val sourcesJar by existing
+            from(jar, sourcesJar)
         }
 
-        into(rootProject.layout.buildDirectory.file("libs/${project.property("mod.version")}"))
+        into(rootProject.layout.buildDirectory.file("libs/${mod.version}"))
         dependsOn("build")
     }
 }
