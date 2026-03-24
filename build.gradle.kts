@@ -136,10 +136,9 @@ dependencies {
     modRuntimeOnly("me.djtheredstoner:DevAuth-${loader.name}:${deps.devAuthVersion}")
     if (loader.isFabric) {
         modImplementation("net.fabricmc:fabric-loader:${deps.fabricLoaderVersion}")!!
-        modImplementation("net.fabricmc.fabric-api:fabric-api:${deps.fabricApiVersion}")
         optionalProp("deps.modmenu_version") { prop ->
             modImplementation("com.terraformersmc:modmenu:$prop") {
-                exclude(group, "net.fabricmc.fabric-api")
+                exclude(group="net.fabricmc.fabric-api")
             }
         }
     } else if (loader.isNeoForge) {
