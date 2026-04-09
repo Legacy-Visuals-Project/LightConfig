@@ -69,6 +69,16 @@ base {
 
 stonecutter {
     replacements.string {
+        direction = eval(current.version, ">=26.2")
+        replace(".setScreen", ".gui.setScreen")
+    }
+
+    replacements.string {
+        direction = eval(current.version, ">=26.2")
+        replace("minecraft.screen", "minecraft.gui.screen()")
+    }
+
+    replacements.string {
         direction = eval(current.version, ">=1.21.11")
         replace("ResourceLocation", "Identifier")
     }

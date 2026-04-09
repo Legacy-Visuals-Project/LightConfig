@@ -48,6 +48,6 @@ public class InternalConfigScreen extends Screen {
     @SuppressWarnings("DataFlowIssue")
     public void onClose() {
         this.config.save();
-        this.minecraft.setScreen(this.parent);
+        this.minecraft.gui.setScreen(this.parent);
     }
 }
